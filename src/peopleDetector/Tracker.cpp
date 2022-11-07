@@ -1,9 +1,9 @@
+#include "Tracker.hpp"
 #include <iostream>
+#include <logging.h>
 #include <mutex>
 #include <thread>
 #include <vector>
-
-#include "Tracker.hpp"
 namespace peopleDetector
 {
 Tracker::Tracker() : _counter(nullptr) {}
@@ -13,7 +13,7 @@ Tracker::Tracker(Counter& counter) : _counter(&counter) {}
 void Tracker::setNewDetections(int idx, DetectionVec incomingDetections)
 {
 	cout_mtx_.lock();
-	std::cout << "//TrackerManager// Running setNewDetections()." << std::endl;
+	LogVerbose("//Tracker// Running setNewDetections()\n");
 	cout_mtx_.unlock();
 
 	_newDetections.clear();
@@ -28,7 +28,8 @@ void Tracker::setNewDetections(int idx, DetectionVec incomingDetections)
 void Tracker::associate()
 {
 	cout_mtx_.lock();
-	std::cout << "//Tracker// Running associate()." << std::endl;
+	LogVerbose("/Tracker// Running associate()\n");
+
 	cout_mtx_.unlock();
 
 	for (int i_track = 0; i_track < _tracks.size(); ++i_track) {
@@ -36,7 +37,8 @@ void Tracker::associate()
 
 		if (track->getObjectState() != terminated) {
 			cout_mtx_.lock();
-			std::cout << "//Tracker// !!!Track!!!: " << track->_id << std::endl;
+			LogVerbose("//Tracker// !!!Track!!!: %i\n", track->_id);
+
 			cout_mtx_.unlock();
 
 			bool track_associated = false;
@@ -44,19 +46,21 @@ void Tracker::associate()
 			for (int i_det = 0; i_det < _newDetections.size(); ++i_det) {
 				auto& det = _newDetections[i_det];
 				cout_mtx_.lock();
-				std::cout << "//Tracker// !!!Detection!!!: " << det->x_mid << "," << det->y_mid << std::endl;
+				LogVerbose("//Tracker// !!!Detection!!!: %f, %f\n", det->x_mid, det->y_mid);
+
 				cout_mtx_.unlock();
 
 				float distance = track->measureDistance(det);
 				cout_mtx_.lock();
-				std::cout << "//Tracker// Measured distance: " << distance << std::endl;
+				LogVerbose("//Tracker// Measured distance: %f\n", distance);
+
 				cout_mtx_.unlock();
 
 				if (distance <= _assocationDistanceThreshold) {
 					det->associated = true;
 					track->sendDetection(det);
 					cout_mtx_.lock();
-					std::cout << "//Tracker// *****Detection " << i_det << " associated to Track " << i_track << std::endl;
+					LogVerbose("//Tracker// Detection %i associated to Track %i\n", i_det, distance);
 					cout_mtx_.unlock();
 					det->trackId = track->_id;
 					track_associated = true;
@@ -66,10 +70,9 @@ void Tracker::associate()
 
 			if (!track_associated) {
 				cout_mtx_.lock();
-				std::cout << "//Tracker// ********Track NOT "
-					     "associated! Sending "
-					     "nullptr..."
-					  << std::endl;
+
+				LogVerbose("//Tracker// Track NOT associated! Sendinng nullptr...\n");
+
 				cout_mtx_.unlock();
 				track->sendDetection(nullptr);
 			}
@@ -80,7 +83,8 @@ void Tracker::associate()
 void Tracker::createNewTracks()
 {
 	cout_mtx_.lock();
-	std::cout << "//Tracker// Running createNewTracks()." << std::endl;
+	//std::cout << "//Tracker// Running createNewTracks()." << std::endl;
+	LogVerbose("//Tracker// Running createNewTracks()\n");
 	cout_mtx_.unlock();
 
 	for (auto& newDet : _newDetections) {

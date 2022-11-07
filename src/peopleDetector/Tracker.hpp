@@ -27,7 +27,7 @@ class Tracker
 	void createNewTracks();
 
 	// ################### Settings ###################
-	const float _assocationDistanceThreshold = 120;
+	const float _assocationDistanceThreshold = 100;
 	// ################################################
 
       private:

@@ -9,7 +9,8 @@
 
 #include "Counter.hpp"
 #include "Detection.hpp"
-#ifdef Success
+
+#ifdef Success // Eigen fail without this
 #undef Success
 #endif
 #include "eigen3/Eigen/Eigen"
@@ -40,7 +41,7 @@ class TrackedObject
 	const int _id; // Unique constant id for the object
 
 	// ################### Settings ###################
-	const int _maxCoastCount = 30;
+	const int _maxCoastCount = 20;
 	const float _initalErrorCovariance = 1.0;
 	const float _processVariance = 1.0;
 	const float _measurmantVariance = 1.0;
@@ -56,6 +57,7 @@ class TrackedObject
 	float measureDistance(std::shared_ptr<Detection>);
 	void sendDetection(std::shared_ptr<Detection>);
 	inline void setCounter(Counter& counter) { _counter = &counter; };
+	void updateCounter(std::shared_ptr<Detection> newDetection);
 
       private:
 	static int _idCount; // Static member increments in constructor and

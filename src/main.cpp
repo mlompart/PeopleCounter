@@ -5,6 +5,7 @@
 #include <jetson-utils/gstCamera.h>
 #include <jetson-utils/gstDecoder.h>
 #include <jetson-utils/gstEncoder.h>
+#include <jetson-utils/gstUtility.h>
 
 #include "peopleDetector/Counter.hpp"
 #include "peopleDetector/Detection.hpp"
@@ -24,17 +25,11 @@ void sig_handler(int signo)
 		signal_recieved = true;
 	}
 }
-
 int main()
 {
 	static Counter counter(0);
 	Tracker tracker(counter);
-	// gstCamera *input = gstCamera::Create();
-
-	// gstDecoder* input =
-	// gstDecoder::Create("rtsp://admin:admin@192.168.1.108:554",
-	// videoOptions::CODEC_H264);
-	gstDecoder* input = gstDecoder::Create("../my_new_video.mp4", videoOptions::CODEC_H264);
+	gstCamera *input = gstCamera::Create(1280, 720);
 
 	if (!input)
 		return -1;
@@ -45,8 +40,7 @@ int main()
 	net->setCounter(counter);
 
 	glDisplay* output = glDisplay::Create();
-	// gstEncoder *output2 = gstEncoder::Create("my_video.mp4",
-	// videoOptions::CODEC_H264);
+
 
 	// detect objects in the frame
 	peopleDetector::Detection* detections = NULL;
@@ -57,9 +51,9 @@ int main()
 
 		// 1. Read in frame detections
 		uchar3* image{nullptr};
-		if (input->Capture(&image, 100) == false) {
+		if (input->Capture(&image, 200) == false) {
 
-			break;
+			continue;
 		}
 		const int numDetections = net->Detect(image, input->GetWidth(), input->GetHeight(), &detections);
 
@@ -84,8 +78,7 @@ int main()
 
 		if (output != NULL) {
 			output->Render(image, input->GetWidth(), input->GetHeight());
-			// output2->Render(image, input->GetWidth(),
-			// input->GetHeight()); update the status bar
+
 			char str[256];
 			sprintf(str, "TensorRT %i.%i.%i | %s | Network %.0f FPS", NV_TENSORRT_MAJOR, NV_TENSORRT_MINOR, NV_TENSORRT_PATCH,
 				precisionTypeToStr(net->GetPrecision()), net->GetNetworkFPS());
@@ -98,12 +91,12 @@ int main()
 
 		++idx;
 	}
-	LogVerbose("detectnet:  shutting down...\n");
+	LogVerbose("PeopleCounter:  shutting down...\n");
 
 	SAFE_DELETE(input);
 	SAFE_DELETE(output);
-	// SAFE_DELETE(output2);
 
-	LogVerbose("detectnet:  shutdown complete.\n");
+	LogVerbose("PeopleCounter:  shutdown complete.\n");
+
 	return 0;
 }

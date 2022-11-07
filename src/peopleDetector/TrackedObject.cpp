@@ -41,9 +41,6 @@ template <typename T> void MessageQueue<T>::send(T&& msg)
 
 void TrackedObject::timeUpdate()
 {
-	cout_mtx_.lock();
-	std::cout << "//TrackedObject// Object ID:" << _id << " timeUpdate()" << std::endl;
-	cout_mtx_.unlock();
 
 	// Predict state transition
 	_X = _A * _X;
@@ -54,9 +51,6 @@ void TrackedObject::timeUpdate()
 
 void TrackedObject::measurementUpdate()
 {
-	cout_mtx_.lock();
-	std::cout << "//TrackedObject// Object ID:" << _id << " measurementUpdate()" << std::endl;
-	cout_mtx_.unlock();
 
 	// Compute Kalman Gain
 	auto _K = _P * _H.transpose() * (_H * _P * _H.transpose() + _R).inverse();
@@ -73,12 +67,6 @@ void TrackedObject::sendDetection(std::shared_ptr<Detection> det) { _detectionQu
 TrackedObject::TrackedObject(std::shared_ptr<Detection> newDet, Counter* counter) : _id(_idCount), _counter(counter)
 {
 	++_idCount;
-	cout_mtx_.lock();
-	std::cout << _id
-		  << "//TrackedObject// Creating new tracked object from "
-		     "detection at: ("
-		  << newDet->x_mid << "," << newDet->y_mid << ")" << std::endl;
-	cout_mtx_.unlock();
 
 	// Initialize state vector with inital position
 	_X << newDet->x_mid, newDet->y_mid, 0, 0, 0, 0;
@@ -98,18 +86,11 @@ TrackedObject::TrackedObject(std::shared_ptr<Detection> newDet, Counter* counter
 void TrackedObject::run()
 {
 	while (_objectState != terminated) {
-		cout_mtx_.lock();
-		std::cout << "//TrackedObject// Object ID:" << _id << " Main loop." << std::endl;
-		cout_mtx_.unlock();
 
 		// Run predict step of Kalman filter
 		if (_objectState != init) {
 			timeUpdate();
 		}
-
-		cout_mtx_.lock();
-		std::cout << "//TrackedObject// Object ID:" << _id << "Receiving message..." << std::endl;
-		cout_mtx_.unlock();
 
 		auto newDetection = _detectionQueue.receive();
 
@@ -123,12 +104,6 @@ void TrackedObject::run()
 				++_coastedFrames;
 			}
 
-			cout_mtx_.lock();
-			std::cout << "//TrackedObject// Track #" << _id
-				  << " received Message!!!!! nullptr... "
-				     "coasting. _coastedFrames: "
-				  << _coastedFrames << std::endl;
-			cout_mtx_.unlock();
 		} else {
 			// if this is the first associated detection when the
 			// tract is still in the init phase, initalize the
@@ -152,20 +127,9 @@ void TrackedObject::run()
 
 			_objectState = active;
 			newDetection->trackId = _id;
-			if (newDetection->x_mid > 400 && _firstState == DetectionState::INCOMER) {
-				_counter->decrement();
-				_firstState = DetectionState::EXITER;
-			}
-			if (newDetection->x_mid < 400 && _firstState == DetectionState::EXITER) {
-				_counter->increment();
-				_firstState = DetectionState::INCOMER;
-			}
-			_coastedFrames = 0;
 
-			cout_mtx_.lock();
-			std::cout << "//TrackedObject// Track #" << _id << " received Message!!!!! det at: (" << newDetection->x_mid << ","
-				  << newDetection->y_mid << ")" << std::endl;
-			cout_mtx_.unlock();
+			updateCounter(newDetection);
+			_coastedFrames = 0;
 
 			// Load new measurment into z
 			_Z << newDetection->x_mid, newDetection->y_mid;
@@ -176,24 +140,18 @@ void TrackedObject::run()
 		// Prune if track has been coasting too long
 		if (_coastedFrames > _maxCoastCount) {
 			_objectState = terminated;
-			cout_mtx_.lock();
-			std::cout << "//TrackedObject// Track #" << _id << " Terminated." << std::endl;
-			cout_mtx_.unlock();
 		}
-
-		cout_mtx_.lock();
-		std::cout << std::endl
-			  << "//TrackedObject// "
-			     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% "
-			  << std::endl;
-		std::cout << "//TrackedObject// %%%%%%%%%%% TRACKID: " << _id << " ---------> END OF THREAD LOOP " << std::endl;
-		std::cout << "//TrackedObject// %%%%%%%%%%% _X: " << std::endl << _X << std::endl;
-		std::cout << "//TrackedObject// %%%%%%%%%%% _state: " << _objectState << std::endl;
-		std::cout << "//TrackedObject// "
-			     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% "
-			  << std::endl
-			  << std::endl;
-		cout_mtx_.unlock();
+	}
+}
+void TrackedObject::updateCounter(std::shared_ptr<Detection> newDetection)
+{ // fix hardcode width picture
+	if (newDetection->x_mid > 640 && _firstState == DetectionState::INCOMER) {
+		_counter->decrement();
+		_firstState = DetectionState::EXITER;
+	}
+	if (newDetection->x_mid < 640 && _firstState == DetectionState::EXITER) {
+		_counter->increment();
+		_firstState = DetectionState::INCOMER;
 	}
 }
 

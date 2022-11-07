@@ -440,8 +440,9 @@ void PeopleDetector::UpdateVisuals(void* input, uint32_t width, uint32_t height,
 		if (!Overlay(input, input, width, height, format, detections, numDetections, overlay))
 			LogError(LOG_TRT "PeopleDetector::Detect() -- failed to render overlay\n");
 	}
+	// drawLine
 	const float4 lineColor = {255, 255, 255, 123};
-	cudaDrawLine(input, input, width, height, format, 400, 0, 400, height, lineColor, lineWidth_);
+	cudaDrawLine(input, input, width, height, format, 640, 0, 640, height, lineColor, lineWidth_);
 
 	const int2 txtPos = make_int2(5, 5);
 	char txt[256];
@@ -600,7 +601,9 @@ bool PeopleDetector::Overlay(void* input, void* output, uint32_t width, uint32_t
 
 				if ((flags & detectNet::OVERLAY_LABEL) && (flags & detectNet::OVERLAY_CONFIDENCE))
 					if (trackId >= 0)
-						sprintf(str, "%i %s %.1f%% ", trackId, className.c_str(), confidence);
+						//sprintf(str, "ID = %i %s %.1f%% ", trackId, className.c_str(), confidence);
+						sprintf(str, "ID = %i", trackId);
+
 					else
 						sprintf(str, "%s %.1f%% ", className.c_str(), confidence);
 				else

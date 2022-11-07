@@ -1,17 +1,36 @@
 #include "Counter.hpp"
 namespace peopleDetector
 {
-std::atomic<int> Counter::counter{0};
+std::atomic<int> Counter::status{0};
+std::atomic<int> Counter::entered{0};
+std::atomic<int> Counter::left{0};
 
-Counter::Counter(const int startValue = 0) { counter = startValue; }
+Counter::Counter(const int startValue = 0) { status = startValue; }
 
-void Counter::decrement() { counter = counter - 1; }
+void Counter::decrement()
+{
+	--status;
+	++left;
+}
 
-void Counter::increment() { counter = counter + 1; }
+void Counter::increment()
+{
+	++status;
+	++entered;
+	;
+}
 
-void Counter::reset() { counter = 0; }
+void Counter::reset()
+{
+	status = 0;
+	entered = 0;
+	left = 0;
+}
 
-void Counter::set(const int value) { counter = value; }
+void Counter::set(const int value) { status = value; }
 
-int Counter::get() const { return counter; }
+int Counter::getStatus() const { return status; }
+int Counter::getEntered() const { return entered; }
+int Counter::getLeft() const { return left; }
+
 } // namespace peopleDetector

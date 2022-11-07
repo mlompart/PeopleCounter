@@ -34,7 +34,7 @@ int main()
 	// gstDecoder* input =
 	// gstDecoder::Create("rtsp://admin:admin@192.168.1.108:554",
 	// videoOptions::CODEC_H264);
-	gstDecoder* input = gstDecoder::Create("../my_video1.mp4", videoOptions::CODEC_H264);
+	gstDecoder* input = gstDecoder::Create("../my_new_video.mp4", videoOptions::CODEC_H264);
 
 	if (!input)
 		return -1;
@@ -80,7 +80,7 @@ int main()
 		tracker.createNewTracks();
 
 		// 5. Update visuals
-		net->upadateVisuals(image, input->GetWidth(), input->GetHeight(), numDetections, frameDetections);
+		net->UpdateVisuals(image, input->GetWidth(), input->GetHeight(), numDetections, frameDetections);
 
 		if (output != NULL) {
 			output->Render(image, input->GetWidth(), input->GetHeight());

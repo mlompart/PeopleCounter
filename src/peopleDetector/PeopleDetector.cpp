@@ -432,7 +432,7 @@ int PeopleDetector::Detect(void* input, uint32_t width, uint32_t height, imageFo
 	return numDetections;
 }
 
-void PeopleDetector::upadateVisuals(void* input, uint32_t width, uint32_t height, imageFormat format, int numDetections,
+void PeopleDetector::UpdateVisuals(void* input, uint32_t width, uint32_t height, imageFormat format, int numDetections,
 				    std::vector<std::shared_ptr<Detection>> detections, uint32_t overlay)
 {
 	// render the overlay
@@ -445,7 +445,7 @@ void PeopleDetector::upadateVisuals(void* input, uint32_t width, uint32_t height
 
 	const int2 txtPos = make_int2(5, 5);
 	char txt[256];
-	sprintf(txt, "Status: %i, In: %i, Out: %i", counter->get(), 0, 0);
+	sprintf(txt, "Status: %i, In: %i, Out: %i", counter->getStatus(), counter->getEntered(), counter->getLeft());
 	static cudaFont* font = NULL;
 
 	// make sure the font object is created

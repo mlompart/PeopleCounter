@@ -10,9 +10,13 @@ class Counter
 	void decrement();
 	void set(const int value);
 	void reset();
-	int get() const;
+	int getStatus() const;
+	int getEntered() const;
+	int getLeft() const;
 
       private:
-	static std::atomic<int> counter;
+	static std::atomic<int> status;
+	static std::atomic<int> entered;
+	static std::atomic<int> left;
 };
 } // namespace peopleDetector

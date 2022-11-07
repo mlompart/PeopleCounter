@@ -45,12 +45,12 @@ class PeopleDetector : public tensorNet
 
 	int Detect(void* input, uint32_t width, uint32_t height, imageFormat format, Detection** detections, uint32_t overlay);
 	template <typename T>
-	void upadateVisuals(T* input, uint32_t width, uint32_t height, int numDetections, std::vector<std::shared_ptr<Detection>> detections,
+	void UpdateVisuals(T* input, uint32_t width, uint32_t height, int numDetections, std::vector<std::shared_ptr<Detection>> detections,
 			    uint32_t overlay = detectNet::OVERLAY_DEFAULT)
 	{
-		upadateVisuals((void*)input, width, height, imageFormatFromType<T>(), numDetections, detections);
+		UpdateVisuals((void*)input, width, height, imageFormatFromType<T>(), numDetections, detections);
 	}
-	void upadateVisuals(void* input, uint32_t width, uint32_t height, imageFormat format, int numDetections,
+	void UpdateVisuals(void* input, uint32_t width, uint32_t height, imageFormat format, int numDetections,
 			    std::vector<std::shared_ptr<Detection>> detections, uint32_t overlay = detectNet::OVERLAY_DEFAULT);
 	inline void setThreshold(float threshold) { coverageThreshold_ = threshold; }
 

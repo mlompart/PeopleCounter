@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 
 # set(CMAKE_CXX_STANDARD 17)
-project(tracker)
+project(PeopleCounter)
 #set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++17 -pthread")
 # set(CMAKE_GENERATOR Ninja)
 set(CMAKE_BUILD_TYPE)
@@ -18,7 +18,7 @@ include_directories(/usr/include/gstreamer-1.0 /usr/lib/aarch64-linux-gnu/gstrea
 link_directories(/usr/lib/aarch64-linux-gnu/tegra)
 
 # Add project executable
-cuda_add_executable(tracker ${project_SRCS})
-target_link_libraries (tracker Eigen3::Eigen)
-target_link_libraries( tracker jetson-inference)
-target_link_libraries( tracker jetson-utils)
+cuda_add_executable(PeopleCounter ${project_SRCS})
+target_link_libraries (PeopleCounter Eigen3::Eigen)
+target_link_libraries( PeopleCounter jetson-inference)
+target_link_libraries( PeopleCounter jetson-utils)
